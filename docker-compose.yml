@@ -1,0 +1,36 @@
+services:
+  # 1. Database
+  db:
+    image: postgres:15-alpine
+    container_name: lab4-db
+    environment:
+      - POSTGRES_DB=lab4
+      - POSTGRES_USER=postgres_user
+      - POSTGRES_PASSWORD=postgres_password
+    ports:
+      - "5432:5432"
+
+  # 2. RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: lab4-rabbit
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  # 3. Your App
+  app:
+    build: .
+    container_name: lab4-app
+    ports:
+      - "8081:8081"
+    environment:
+      # Connect to DB Service
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/lab4
+      - SPRING_DATASOURCE_USERNAME=postgres_user
+      - SPRING_DATASOURCE_PASSWORD=postgres_password
+      # Connect to RabbitMQ Service
+      - SPRING_RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - db
+      - rabbitmq
